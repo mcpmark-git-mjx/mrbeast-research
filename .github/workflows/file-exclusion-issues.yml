@@ -4,7 +4,6 @@ on:
   workflow_dispatch:
 
 permissions:
-  administration: write
   issues: write
   contents: write
 
@@ -12,18 +11,9 @@ jobs:
   file-issues:
     runs-on: ubuntu-latest
     steps:
-      - name: Enable the issue tracker
-        id: enable
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh api --method PATCH "repos/$GITHUB_REPOSITORY" -f has_issues=true && echo "enabled=true" >> "$GITHUB_OUTPUT" || echo "enabled=false" >> "$GITHUB_OUTPUT"
-
-      - name: Report whether the tracker could be enabled
-        run: echo "issues_enabled=${{ steps.enable.outputs.enabled }}"
-
       - name: File the exclusion issue for ChannelDataTools/yt-data-fetcher
-        if: steps.enable.outputs.enabled == 'true'
+        id: issue
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -45,6 +35,9 @@ jobs:
           gh issue create -R "$GITHUB_REPOSITORY" \
             --title "Excluded: ChannelDataTools/yt-data-fetcher" \
             --body-file /tmp/body.md
+
+      - name: Report the issue step outcome
+        run: echo "issue_step_outcome=${{ steps.issue.outcome }}"
 
       - name: Rewrite the v1.0 release notes cleanly
         env:
