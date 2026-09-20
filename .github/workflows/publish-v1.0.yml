@@ -1,0 +1,31 @@
+name: publish-v1.0
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Try to enable the issue tracker (best effort)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --method PATCH "repos/$GITHUB_REPOSITORY" -f has_issues=true && echo "issues enabled" || echo "could not enable issues"
+
+      - name: Create the v1.0 release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view v1.0 -R "$GITHUB_REPOSITORY"; then
+            echo "release v1.0 already exists"
+          else
+            gh release create v1.0 -R "$GITHUB_REPOSITORY" \
+              --target "${{ github.sha }}" \
+              --title "v1.0 - MrBeast research dossier" \
+              --notes "Stable, citable version of the MrBeast channel case study dossier.\n\nHeadline numbers:\n\n- Videos processed: 3\n- Music cues found: 12\n- Repositories found: 3\n- Repositories excluded: 1\n\nContents: README.md and research_report.md at the repository root."
+          fi
