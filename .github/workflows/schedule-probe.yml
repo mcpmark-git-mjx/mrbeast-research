@@ -1,0 +1,15 @@
+name: schedule-probe
+
+on:
+  schedule:
+    - cron: '*/2 * * * *'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report
+        run: |
+          echo "scheduled trigger works"
+          date -u
