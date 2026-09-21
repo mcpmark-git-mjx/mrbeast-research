@@ -34,6 +34,8 @@ Credited artists (8):
 | https://github.com/MrBeastChannel/mrbeast-youtube-analytics | 432 | Python |
 | https://github.com/CreatorStats/youtube-channel-stats | 87 | TypeScript |
 
+The repository search returned 3 repositories in total. The two above cleared the 30-star minimum and stay in. The third — `ChannelDataTools/yt-data-fetcher`, 23 stars — fell below it, so it is not kept in this table; it is flagged under `## Excluded` and in a dedicated entry in this repository's issue list rather than being silently dropped.
+
 ## Excluded
 
 | URL | Stars | Primary Language |

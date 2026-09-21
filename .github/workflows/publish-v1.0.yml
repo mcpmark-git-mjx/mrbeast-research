@@ -10,22 +10,32 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Try to enable the issue tracker (best effort)
-        continue-on-error: true
+      - name: Republish the v1.0 release at the current commit
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh api --method PATCH "repos/$GITHUB_REPOSITORY" -f has_issues=true && echo "issues enabled" || echo "could not enable issues"
-
-      - name: Create the v1.0 release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if gh release view v1.0 -R "$GITHUB_REPOSITORY"; then
-            echo "release v1.0 already exists"
-          else
-            gh release create v1.0 -R "$GITHUB_REPOSITORY" \
-              --target "${{ github.sha }}" \
-              --title "v1.0 - MrBeast research dossier" \
-              --notes "Stable, citable version of the MrBeast channel case study dossier.\n\nHeadline numbers:\n\n- Videos processed: 3\n- Music cues found: 12\n- Repositories found: 3\n- Repositories excluded: 1\n\nContents: README.md and research_report.md at the repository root."
+          if gh release view v1.0 -R "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "removing the existing v1.0 release and tag"
+            gh release delete v1.0 -R "$GITHUB_REPOSITORY" --yes --cleanup-tag
           fi
+          cat > /tmp/notes.md <<'EOF'
+          Stable, citable version of the MrBeast channel case study dossier.
+
+          ## Headline numbers
+
+          - Videos processed: 3
+          - Music cues found: 12
+          - Repositories found: 3
+          - Repositories excluded: 1
+
+          ## Contents
+
+          - `README.md` — headline numbers and method
+          - `research_report.md` — the dossier (Videos, Music Credits, Repositories, Excluded)
+
+          Tagged `v1.0` so the dossier can be cited as a stable version.
+          EOF
+          gh release create v1.0 -R "$GITHUB_REPOSITORY" \
+            --target "${{ github.sha }}" \
+            --title "v1.0 - MrBeast research dossier" \
+            --notes-file /tmp/notes.md
